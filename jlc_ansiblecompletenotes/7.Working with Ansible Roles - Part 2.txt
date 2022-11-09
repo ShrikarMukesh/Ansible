@@ -1,0 +1,243 @@
+Ansible Contriller
+ssh ubuntu@3.128.76.85
+
+
+=======================
+Create Role - nginx-role
+=======================
+ Use ansible-galaxy command to create a Ansible roles which has the templates to create it. 
+
+A) On Ansible Controller
+===================
+1) Create nginx-playbook.yml under MyWork
+
+touch nginx-playbook.yml
+
+2) Open Roles folder
+
+cd roles
+
+3) Create the Role using ansible-galaxy command
+
+roles> ansible-galaxy  init nginx-role
+
+4) You can see nginx-role is created and observe following directory sructure.
+
+roles $  ls -l
+
+roles $  tree nginx-role
+
+mywork/roles $ tree nginx-role
+
+hello-role
+├── README.md
+├── defaults
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars
+    └── main.yml
+
+
+5) Remove the folders which are not required
+
+mywork/roles/nginx-role $ rm -rf defaults tests meta
+
+6) See the Directory structure after Removing unnecessary
+
+roles $  tree nginx-role
+
+mywork/roles $ tree nginx-role
+
+hello-role
+├── README.md
+├── handlers
+│   └── main.yml
+├── files
+├── tasks
+│   └── main.yml
+├── templates
+└── vars
+    └── main.yml
+
+B) On Local Machine
+===================
+7) Create the Directory structure for nginx-role in local machine.
+
+8) Create nginx-role folder in roles folder
+
+9)  Create vars folder  nginx-role folder
+
+10) Write main.yml in vars  folder as follows.
+========
+main.yml
+========
+#  variables for nginx-role
+
+nginxPort: 12345
+
+11)  Create defaults folder  nginx-role folder
+
+12) Write main.yml in vars  folder as follows.
+========
+main.yml
+========
+#  Default variables for nginx-role
+
+nginxPort: 54321
+
+
+13)  Create files folder   nginx-role folder
+
+14) Place the required files here
+A) We are considering one file called index.html as follows
+========
+index.html
+========
+<h1> Welcome to Java Learning Center</h1>
+<h2> Hello Guys, I am from Ngnix Server </h2>
+
+
+B) We are considering another file called defaults as follows
+========
+defaults
+========
+
+server {
+        listen 12345 default_server;
+        listen [::]:12345 default_server;
+
+        root /var/www/html;
+
+        index index.html index.htm;
+
+        server_name _;
+        location / {
+                try_files $uri $uri/ =404;
+        }
+    
+}
+
+
+15)  Create handlers folder  nginx-role folder
+
+16) Write main.yml in tasks folder as follows.
+========
+main.yml
+========
+---
+# handlers for nginx
+
+- name: Restart Nginx
+  service:
+     name: nginx
+     state: restarted
+
+
+17)  Create tasks folder  nginx-role folder
+
+18) Write main.yml in tasks folder as follows.
+========
+main.yml
+========
+---
+- name: UnIntsall Nginx 
+  apt: 
+    name: nginx
+    state: absent
+
+- name: Intsall Nginx 
+  apt: 
+    name: nginx
+    state: latest
+
+- name: copy default to Nginx Server
+  copy:
+     src: files/default
+     dest: /etc/nginx/sites-enabled/
+  notify: 
+    - Restart Nginx
+    
+- name: copy index.html to Nginx Server
+  copy:
+     src: files/index.html
+     dest: /var/www/html
+  notify: 
+    - Restart Nginx
+
+
+19) Update nginx-playbook.yml to include nginx-role developed above
+=================
+nginx-playbook.yml
+================
+---
+- name: Using Nginx Role in playbook
+  hosts: all
+  become: true
+  
+  roles:
+    - role: nginx-role
+
+20) Now Every thing on Local. Move to Ansible controller 
+=========================================================
+scp  nginx-playbook.yml ubuntu@3.128.76.85:/home/ubuntu/MyWork
+scp -r  nginx-role ubuntu@3.128.76.85:/home/ubuntu/MyWork/roles
+=========================================================
+
+C) On Ansible Controller
+===================
+21)Check the Directory Structure and files on Ansible Controller as follows.
+
+nginx-role
+├── defaults
+│   └── main.yml
+├── files
+│   └── index.html
+├── handlers
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+│   └── defaults
+└── vars
+    └── main.yml
+
+22) Run the Playbook
+
+ansible-playbook nginx-playbook.yml
+
+23) Test the Ngins Server running or not.
+
+http://18.224.1.215:12345/
+http://3.128.29.101:12345/
+
+
+D) On MyNode1
+===================
+24)  Check on   MyNode1 
+
+ssh ubuntu@18.224.1.215
+
+cat  /etc/nginx/sites-enabled/default
+cat  /var/www/html/index.html
+
+25)  Check on   MyNode2
+ 
+ssh ubuntu@3.19.228.17
+
+cat  /etc/nginx/sites-enabled/default
+cat  /var/www/html/index.html
+===========================================
+
+
+
+

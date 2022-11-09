@@ -1,0 +1,200 @@
+Ansible Controller
+
+ssh ubuntu@18.191.211.152
+
+C) Customizing Inventory and Config Files
+==================================
+11)Customize the Inventory File
+========================
+11.a) On your Local machine
+----------------------------------
+Write myhosts1 in VSCode editor as follows
+
+172.31.28.107
+172.31.17.206
+
+[myjlcweb]
+172.31.28.107
+
+[myjlcdb]
+172.31.17.206
+
+11.b) On Ansible Controller
+--------------------------------
+ansible all -m ping -u ubuntu -k
+
+sudo rm /etc/ansible/hosts
+
+ansible all -m ping -u ubuntu -k
+
+mkdir myjlc
+cd myjlc
+
+scp myhosts1 ubuntu@18.191.211.152:/home/ubuntu/myjlc
+
+ansible all -i myhosts1 -m ping -u ubuntu -k
+
+11.a) On your Local machine
+----------------------------------
+Write myhosts2 in VSCode editor as follows
+
+[myjlc]
+172.31.28.107
+172.31.17.206
+
+[myjlcweb]
+172.31.28.107
+
+[myjlcdb]
+172.31.17.206
+
+ [myjlc:vars]
+ ansible_ssh_user = ubuntu
+ ansible_ssh_pass = srinivas
+
+ [myjlcweb:vars]
+ ansible_ssh_user = ubuntu
+ ansible_ssh_pass = srinivas
+
+ [myjlcdb:vars]
+ ansible_ssh_user = ubuntu
+ ansible_ssh_pass = srinivas
+
+scp myhosts2 ubuntu@18.191.211.152:/home/ubuntu/myjlc
+
+11.d) On Ansible Controller
+--------------------------------
+ansible all -i myhosts2 -m ping -u ubuntu -k
+
+ansible all -i myhosts2 -m ping
+
+ansible myjlc -i myhosts2 -m ping
+
+ansible myjlcweb -i myhosts2 -m ping
+
+ansible myjlcdb -i myhosts2 -m ping
+
+12)Customize ansible.cfg
+========================
+ansible --version
+
+config file = /etc/ansible/ansible.cfg
+
+cp /etc/ansible/ansible.cfg .
+ls
+
+ansible --version
+
+config file = /home/ubuntu/myjlc/ansible.cfg
+
+Write ansible.cfg in VSCode editor as follows
+----------------------------------------------------
+[defaults]
+
+host_key_checking = False
+
+inventory = /home/ubuntu/myjlc/myhosts2
+
+scp ansible.cfg ubuntu@18.191.211.152:/home/ubuntu/myjlc
+
+ansible all  -m ping
+
+ansible myjlc  -m ping
+
+ansible myjlcweb -m ping
+
+ansible myjlcdb -m ping
+
+13) Display RAM Utilization
+
+ansible all -a "free -m"
+
+14) Display Disk Utilization
+
+ansible all -a "df -h"
+
+15) Display Facts of All the Nodes
+
+ansible all -m setup 
+
+16)  Display Facts of All Limited Nodes 
+
+ansible all -m setup --limit "172.31.28.107"
+
+17) Create File
+
+ssh ubuntu@13.58.216.127
+ssh ubuntu@3.129.8.246
+ mkdir hello
+
+ansible all -a "touch /home/ubuntu/hello/hello.txt"
+
+18) Check whether File is Created or Not
+
+ansible all -a "ls -l /home/ubuntu/hello"
+
+ansible all -a "ls -l /home/ubuntu/myjlc"
+
+19) Install Apache Web Server
+
+ansible all -b -a "apt update" 
+ansible all -b -a "apt install -y apache2"
+
+20)  Check the Status of Web Server
+
+ansible all -b -a "service apache2 status"
+
+===========================================
+21) Write myhosts in VSCode editor as follows
+
+172.31.28.107
+172.31.17.206
+
+[myjlcweb]
+172.31.28.107
+
+[myjlcdb]
+172.31.17.206
+
+scp myhosts  ubuntu@18.191.211.152:/home/ubuntu/myjlc
+
+22) Write ansible.cfg in VSCode editor as follows
+----------------------------------------------------
+[defaults]
+
+host_key_checking = False
+
+inventory = /home/ubuntu/myjlc/myhosts
+
+scp ansible.cfg ubuntu@18.191.211.152:/home/ubuntu/myjlc
+
+23) RUn Ansible Commands
+
+ansible all -m ping -u ubuntu -k 
+
+ansible myjlcweb -m ping   -u ubuntu -k 
+
+ansible myjlcdb -m ping   -u ubuntu -k 
+
+24) SSH Authetication
+
+ssh-keygen
+
+ssh-copy-id 172.31.28.107
+ssh-copy-id 172.31.17.206
+
+ssh 172.31.28.107
+ssh 172.31.17.206
+
+25) RUn Ansible Commands
+
+ansible all -m ping
+
+ansible myjlcweb -m ping 
+
+ansible myjlcdb -m ping 
+
+
+
+
+

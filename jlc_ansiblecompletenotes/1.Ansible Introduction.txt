@@ -1,0 +1,26 @@
+What is Ansible?
+Ans: Ansible is simplest IT automation engine that automates cloud provisioning configuration management.
+
+Important Points:
+==============
+*** Ansible is developed by RedHat.
+*** Ansible is implimented in python
+*** Ansible can be installed only on Linux machines
+
+==> Ansible communicates with all nodes using SSH.
+==> Ansible pushes the instructions to nodes.
+==> Instructions sent to Ansible will be converted to python Scripts.
+==> Python Scripts will be exeeted on all or desived nodes.
+==> Ansible runs the instructions on nodes.
+==> Ansible is purely agent-less which means no need to install any ansible software on the nodes.
+
+==> You can write Ansible instructions in 3 ways
+	*** Ad-HoC/ Impertive way
+	*** Playbooks
+	*** Roles
+
+==> You cancan write ansible instructions in YAML
+
+Ansible is Idempotent:
+------------------------------
+Operation is idempotent if  the result of performming operation once is exactly same as result of performming operation repeatedly.

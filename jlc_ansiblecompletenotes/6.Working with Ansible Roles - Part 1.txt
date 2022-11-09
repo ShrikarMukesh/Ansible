@@ -1,0 +1,283 @@
+Ansible Contriller
+ssh ubuntu@3.128.76.85
+
+
+Ansible Roles
+==============
+1. Introduction
+==============
+=> Role is a Package that contains all required for Running your Playbooks.
+
+=> Role heps you organize your Playbooks.
+
+=> Role Contains Ansible Instructions and dependent Requirements.
+
+=> Roles allow you to re-use common Configuration requirements among multiple Playbooks and even among multiple projects.
+
+=> Roles let you automatically load related vars, files, tasks, handlers, and other Ansible artifacts based on a known file structure. 
+
+=> After you group your content in roles, you can easily reuse them and share them with other users.
+==================
+2. Ansible Role artifacts 
+==================
+=> Every Role Contains the following artifacts 
+	1) tasks
+	2) handlers
+	3) defaults
+	4) vars
+	5) files
+	6) templates
+	7) meta
+
+By default Ansible will look in each directory within a role for a main.yml file for relevant content 
+
+1) tasks
+========
+=> tasks folder Contains main.yml 
+=> You need to write main list of tasks that the role executes in main.yml.
+
+2) handlers
+==========
+=> handlers folder Contains main.yml 
+=> You need to write Reusable tasks called as Handlers in main.yml
+=> These handlers will be used within or outside this role.
+
+3) defaults
+==========
+=> defaults folder Contains main.yml 
+=> You need to define default variables for the role in main.yml
+=> These variables have the lowest priority of any variables available, and can be easily overridden by any other variable.
+
+4) vars
+==========
+=> vars folder Contains main.yml 
+=> You need to define variables for the role in main.yml
+
+5) files
+==========
+=> You need to place the files in this folder that the role deploys.
+
+6) templates
+==========
+=> You need to place the templates in this folder that the role deploys.
+
+7) meta
+==========
+=> meta folder Contains main.yml 
+=> You need to write  metadata for the role in main.yml, including role dependencies.
+
+=====================
+3. Role directory structure
+=====================
+
+*** Diagram on Board***
+
+=====================
+4. Create First Role - hello_role
+=====================
+ Use ansible-galaxy command to create a Ansible roles which has the templates to create it. 
+
+Steps 
+A) On Local Machine
+===================
+1) Create the MyWork Directory.
+mkdir MyWork
+cd MyWork
+
+2) Place following ansible.cfg written in MyWork.
+
+[defaults]
+
+host_key_checking = False
+inventory = /home/ubuntu/myjlc/myhosts
+
+
+B) On Ansible Controller
+===================
+3) Create the MyWork Directory.
+(Note : This MyWork folder contains playbooks and roles folder)
+mkdir MyWork
+cd MyWork
+
+4)Copy ansible.cfg from local to /home/ubuntu/MyWork
+
+scp ansible.cfg ubuntu@3.128.76.85:/home/ubuntu/MyWork
+
+5) Create hello-playbook.yml under MyWork
+
+touch hello-playbook.yml
+
+6) Create roles Directory under MyWork
+
+mkdir roles
+cd roles
+7) Create the Role using ansible-galaxy command
+
+roles> ansible-galaxy  init hello-role
+
+8) You can see hello-role is created and observe following directory sructure.
+
+roles $  ls -l
+
+roles $  tree hello-role
+
+mywork/roles $ tree hello-role
+
+hello-role
+├── README.md
+├── defaults
+│   └── main.yml
+├── files
+├── handlers
+│   └── main.yml
+├── meta
+│   └── main.yml
+├── tasks
+│   └── main.yml
+├── templates
+├── tests
+│   ├── inventory
+│   └── test.yml
+└── vars
+    └── main.yml
+
+
+9) Remove the folders which are not required
+
+mywork/roles/hello-role $ rm -rf handlers tests meta
+
+10) See the Directory structure after Removing unnecessary
+
+roles $  tree hello-role
+
+mywork/roles $ tree hello-role
+
+hello-role
+├── README.md
+├── defaults
+│   └── main.yml
+├── files
+├── tasks
+│   └── main.yml
+├── templates
+└── vars
+    └── main.yml
+
+C) On Local Machine
+===================
+11) Create the Directory structure for hello-role in local machine.
+
+12) Create roles folder in MyWork
+
+13) Create hello-role folder in roles folder
+
+14)  Create defaults folder  hello-role folder
+
+15) Write main.yml in defaults folder as follows.
+========
+main.yml
+========
+# defaults variables for hello-role
+
+companyName: Java Learning Center
+trainerName: Srinivas Dande
+trainerEmail: sri@jlc.com
+
+16)  Create vars folder  hello-role folder
+
+17) Write main.yml in vars  folder as follows.
+========
+main.yml
+========
+#  variables for hello-role
+
+courseName: Master DevOps
+coursePrice: 15000
+
+18)  Create files folder  hello-role folder
+
+19) Place the required files here
+We are considering one file called hellojlc.txt as follows
+========
+hellojlc.txt 
+========
+Hello JLC Guys, I am hellojlc.txt
+Hello JLC Guys, I am hellojlc.txt
+
+20)  Create templates folder  hello-role folder
+
+21) Place the required template files here
+We are considering one file called hello-template.j2 as follows
+========
+hello-template.j2
+========
+Welcome to {{ companyName }}
+
+Details of the Course 
+
+Course Name : {{ courseName }}
+Course Price : {{ coursePrice }}
+Trainer Name : {{ trainerName }}
+Trainer Email  : {{ trainerEmail }}
+
+22)  Create tasks folder  hello-role folder
+
+23) Write main.yml in tasks folder as follows.
+========
+main.yml
+========
+---
+- name: copy template file
+  template:
+     src: templates/hello-template.j2
+     dest: /home/ubuntu/bookStore
+ 
+- name: copy hello file
+  copy:
+     src: files/hello.txt
+     dest: /home/ubuntu/bookStore
+ 
+24) Update hello-playbook.yml to include hello-role developved above
+=================
+hello-playbook.yml
+================
+---
+- name: Using Hello Role in playbook
+  hosts: all
+  become: true
+  
+  roles:
+    - role: hello-role
+
+25) Now Every thing on Local. Move to Ansible controller 
+=========================================================
+  scp  hello-playbook.yml ubuntu@3.144.214.179:/home/ubuntu/mywork
+  scp -r  hello-role ubuntu@3.144.214.179:/home/ubuntu/mywork/roles
+=========================================================
+
+D) On Ansible Controller
+===================
+26)Check the Directory Structure and files on Ansible Controller as follows.
+
+
+27) Run the Playbook
+
+ansible-playbook hello-playbook.yml
+
+ansible all -a "ls -l /home/ubuntu/bookStore"
+
+E) On MyNode1
+===================
+28) Connect to  MyNode1 
+
+ssh ubuntu@52.15.60.96
+
+29) Check the Files and Content 
+
+cd bookStore
+bookStore $ cat hellojlc.txt
+
+bookStore $ cat hello-template.j2
+
+
+

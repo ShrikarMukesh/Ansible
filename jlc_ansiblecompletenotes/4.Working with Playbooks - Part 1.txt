@@ -1,0 +1,307 @@
+Ansible Contriller
+
+ssh ubuntu@13.59.139.143
+
+MyNode 1
+
+ssh ubuntu@18.189.16.40
+
+Working with Playbooks
+====================
+=>  A playbook is composed of one or more ‘Tasks’ in an ordered list
+
+=>  Ansible Playbooks offer a repeatable, re-usable, simple configuration management and multi-machine deployment system
+
+=>   If you need to execute a task with Ansible more than once, Write a playbook and Run or Reuse many times
+
+==============
+Demo1 - Copy Files
+==============
+YML File :  myplaybook1.yml
+------------------------------------
+- hosts: all
+  tasks:
+    - name: Copy Files
+      copy: 
+        src: hello.txt
+        dest: /home/ubuntu
+
+=========================================================
+scp myplaybook1.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible all -a "ls -l /home/ubuntu"
+
+ansible-playbook myplaybook1.yml 
+
+ansible all -a "ls -l /home/ubuntu"
+
+ansible-playbook myplaybook1.yml 
+
+ansible all -a "ls -l /home/ubuntu"
+
+==================
+Demo2 - Create New Folder
+==================
+YML File :  myplaybook2.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather-facts: no
+  tasks:
+    - name: Create Folder
+      file: 
+        path: /home/ubuntu/appCode
+        state: directory 
+
+=========================================================
+scp myplaybook2.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible all -a "ls -l /home/ubuntu"
+
+ansible-playbook myplaybook2.yml 
+
+ansible all -a "ls -l /home/ubuntu"
+
+ansible-playbook myplaybook2.yml 
+
+ansible all -a "ls -l /home/ubuntu"
+
+===================
+Demo3 - Create New File
+===================
+YML File :  myplaybook3.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: NO
+  tasks:
+    - name: Create File
+      file: 
+        path: /home/ubuntu/appCode/hai.txt
+        state: touch 
+
+=========================================================
+scp myplaybook3.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible all -a "ls -l /home/ubuntu/appCode"
+
+ansible-playbook myplaybook3.yml 
+
+ansible all -a "ls -l /home/ubuntu/appCode"
+
+===================
+Demo4 - Copy File and Delete File
+===================
+YML File :  myplaybook4.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: NO
+  tasks:
+    - name: Create File
+      file: 
+        path: /home/ubuntu/appCode/Test.java
+        state: touch 
+
+    - name: Copy File
+      copy: 
+        src: hello.txt
+        dest: /home/ubuntu/appCode
+
+    - name: Delete File
+      file: 
+        path: /home/ubuntu/hello.txt
+        state: absent         
+
+=========================================================
+scp myplaybook4.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible all -a "ls -l /home/ubuntu/appCode"
+
+ansible all -a "ls -l /home/ubuntu"
+
+ansible-playbook myplaybook4.yml 
+
+ansible all -a "ls -l /home/ubuntu/appCode"
+
+ansible all -a "ls -l /home/ubuntu"
+
+===================
+Demo5 - Install Git and Clone the Project
+===================
+YML File :  myplaybook5.yml
+------------------------------------
+- hosts: all
+  become: yes
+  tasks:
+    - name: Git Installation
+      apt: 
+        name: git
+        state: present 
+
+    - name: Clone the Project
+      git: 
+        repo: https://github.com/DandesClasses/myjlc-bookstore-maven
+        dest: /home/ubuntu/bookStore
+
+=========================================================
+scp myplaybook5.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible all -a "ls -l /home/ubuntu"
+
+ansible-playbook myplaybook5.yml 
+
+ansible-playbook myplaybook5.yml 
+
+ansible all -a "ls -l /home/ubuntu"
+
+===================
+Demo6 -  Run Shell Commands
+===================
+YML File :  myplaybook6.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: NO
+  tasks:
+    - name: Run Command
+      shell: ls /home/ubuntu
+      register: myout 
+
+    - name: Print Output
+      debug: 
+#       msg: "{{myout}}"
+        msg: "{{myout.stdout_lines}}"
+
+
+=========================================================
+scp myplaybook6.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible all -a "ls -l /home/ubuntu"
+
+ansible-playbook myplaybook6.yml 
+
+ansible-playbook myplaybook6.yml 
+
+ansible all -a "ls -l /home/ubuntu"
+
+===================
+Demo7 - Variables
+===================
+YML File :  myplaybook7.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: NO
+  vars:
+    name: Srinivas
+    email: sri@jlc.com
+  tasks:
+    - name: Print Name
+      debug: 
+        msg: " Name : {{name}} "
+    - name: Print Email
+      debug: 
+        msg: " Email : {{email}} "
+
+=========================================================
+scp myplaybook7.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook7.yml 
+
+
+===================
+Demo8 - Loops
+===================
+YML File :  myplaybook8.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: NO
+  tasks:
+    - name: Display Courses
+      debug: 
+        msg: "{{item}}"
+      with_items:
+        - Java Full Stack
+        - MicroServices
+        - DevOps
+        - AWS
+
+
+=========================================================
+scp myplaybook8.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook8.yml 
+
+
+===================
+Demo9 - Loops
+===================
+YML File :  myplaybook9.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: NO
+  tasks:
+    - name: Create Files
+      file: 
+        path: "/home/ubuntu/appCode/{{item}}"
+        state: touch 
+      loop:
+        - test1.txt
+        - test2.txt
+        - test3.txt
+        - test4.txt
+        - test5.txt
+
+
+=========================================================
+scp myplaybook9.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible all -a "ls -l /home/ubuntu/appCode"
+
+ansible-playbook myplaybook9.yml 
+
+ansible all -a "ls -l /home/ubuntu/appCode"
+
+===================
+Demo10 - Loops
+===================
+YML File :  myplaybook10.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: NO
+  tasks:
+    - name: Create Users
+      user: 
+        name: "{{item.userName}}"
+        state: present
+        uid: "{{item.userId}}"
+      loop:
+        - userName : srinivas
+           userId: 5000
+        - userName : jlcindia
+           userId: 1234
+
+
+=========================================================
+scp myplaybook10.yml ubuntu@13.59.139.143:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook10.yml
+
+ansible-playbook myplaybook10.yml
+
+
+ansible all -a "ls -l /home/ubuntu/appCode"

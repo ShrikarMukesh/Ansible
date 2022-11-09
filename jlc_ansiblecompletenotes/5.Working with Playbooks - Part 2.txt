@@ -1,0 +1,390 @@
+Ansible Contriller
+
+ssh ubuntu@3.138.155.60
+
+MyNode 1
+
+ssh ubuntu@18.116.30.39
+
+===================
+Demo11 - Check Uptime
+===================
+YML File :  myplaybook11.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Check Machines
+      command: uptime
+      register: upInfo
+
+    - name: Print Machine uptime
+      debug:
+        msg: "{{upInfo.stdout_lines}}"
+    
+
+=========================================================
+scp myplaybook11.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook11.yml
+
+===================
+Demo12 - Conditions
+===================
+YML File :  myplaybook12.yml
+------------------------------------
+
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Check Readhat Machines
+      command: uptime
+      register: upInfo
+      when:
+        - ansible_distribution  == 'RedHat'
+
+    - name: Print Machine uptime
+      debug:
+        msg: "{{upInfo.stdout_lines}}"
+      when:
+        - ansible_distribution  == 'RedHat'
+    
+
+=========================================================
+scp myplaybook12.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook12.yml
+
+
+===================
+Demo13 - Conditions
+===================
+YML File :  myplaybook13.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Check ReadHat Machines
+      command: uptime
+      register: upInfo
+      when:
+        - ansible_distribution  == 'RedHat'
+
+    - name: Print ReadHat Machine uptime
+      debug:
+        msg: "{{upInfo.stdout_lines}}"
+      when:
+        - ansible_distribution  == 'RedHat'
+
+    - name: Check Ubuntu Machines
+      command: uptime
+      register: upInfo
+      when:
+        - ansible_distribution  == 'Ubuntu'
+
+    - name: Print Ubuntu Machine uptime
+      debug:
+        msg: "{{upInfo.stdout_lines}}"
+      when:
+        - ansible_distribution  == 'Ubuntu'  
+    
+
+=========================================================
+scp myplaybook13.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook13.yml
+
+
+
+===================
+Demo14 - Conditions
+===================
+YML File :  myplaybook14.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+
+    - name: Install Nginx Server on Ubuntu
+      apt: 
+        name: nginx
+        state: present
+      when: 
+        - ansible_distribution  == 'Ubuntu' 
+
+    - name: Install Apache2 Server on RedHat
+      yum: 
+        name: apache2
+        state: present
+      when: 
+        - ansible_distribution  == 'RedHat' or ansible_distribution  == 'SUSE'
+
+=========================================================
+scp myplaybook14.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook14.yml
+
+===================
+Demo15 - Conditions
+===================
+YML File :  myplaybook15.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: UnIntsall Nginx Server from Ubuntu
+      apt: 
+        name: nginx
+        state: absent
+      when: 
+        - ansible_distribution  == 'Ubuntu' 
+
+    - name: Install Nginx Server on Ubuntu
+      apt: 
+        name: nginx
+        state: present
+      when: 
+        - ansible_distribution  == 'Ubuntu' 
+
+    - name: UnInstall Apache2 Server from RedHat
+      yum: 
+        name: apache2
+        state: absent
+      when: 
+        - ansible_distribution  == 'RedHat' or ansible_distribution  == 'SUSE'
+
+    - name: Install Apache2 Server on RedHat
+      yum: 
+        name: apache2
+        state: present
+      when: 
+        - ansible_distribution  == 'RedHat' or ansible_distribution  == 'SUSE'        
+
+=========================================================
+scp myplaybook15.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook15.yml
+
+===================
+Demo16 - Loops and Conditions
+===================
+YML File :  myplaybook16.yml
+------------------------------------
+- hosts: localhost
+  become: yes
+  gather_facts: yes
+  tasks:
+    - command: echo {{ item }}
+      when: item%2 == 0
+      loop: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+      
+
+=========================================================
+scp myplaybook16.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook16.yml
+
+===================
+Demo17 - Loops and Conditions
+===================
+YML File :  myplaybook17.yml
+------------------------------------
+- hosts: all
+  become: yes
+  gather_facts: yes
+  vars: 
+    mysoftwares:
+      - name: maven
+        required: True
+      - name: nginx 
+        required: True
+      - name: apache2 
+        required: False
+      - name: mysql 
+        required: False
+  tasks:
+    - name: UnInstallation
+      apt: 
+        name: "{{ item.name}}"
+        state: absent
+      when: item.required == True
+      loop : "{{mysoftwares}}"
+
+    - name: Instaltion
+      apt: 
+        name: "{{ item.name}}"
+        state: present
+      when: item.required == True
+      loop : "{{mysoftwares}}"   
+
+
+=========================================================
+scp myplaybook17.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook17.yml
+
+
+===================
+Demo18 -Sending Emails
+===================
+YML File :  myplaybook18.yml
+------------------------------------
+- hosts: localhost
+  become: yes
+  gather_facts: yes
+  tasks: 
+    - name: Start apache2 Service 
+      command: service apache2 start
+
+    - name: Check Server Status 
+      command: service apache2 status
+      register: result
+
+    - name: Send Email
+      mail: 
+        to: srinivas@coursecube.com
+        subject: Apache2 Service Alert
+        body: Cool !!!- Apache2 Service is Up and Running
+        host: smtp.gmail.com
+        port: 587
+        username: hellojlc9999@gmail.com
+        password: hello@JLC123
+
+      when: result.stdout.find("inactive") == -1
+       
+    
+=========================================================
+scp myplaybook18.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+
+ansible-playbook myplaybook18.yml
+
+ityashkr@gmail.com
+rishi.sharma8061@gmail.com
+
+===================
+Demo19 - Deploying Project
+===================
+YML File :  myplaybook19.yml
+------------------------------------
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: OpenJdk-1.8 Installation
+      apt: 
+        name: openjdk-8-jdk
+        state: latest
+        install_recommends: no
+
+    - name: Add tomcat group
+      group:
+        name: tomcat
+
+    - name: add tomcat user
+      user: 
+        name: tomcat
+        group: tomcat
+        createhome: no
+
+    - name: Download Tomcat
+      get_url: 
+        url: https://archive.apache.org/dist/tomcat/tomcat-8/v8.5.40/bin/apache-tomcat-8.5.40.tar.gz
+        dest: /tmp/apache-tomcat-8.5.40.tar.gz
+
+    - name: Extract Tomcat tarfile
+      unarchive: 
+        src: /tmp/apache-tomcat-8.5.40.tar.gz
+        dest: /opt
+        remote_src: yes
+
+    - name: Symlink Creation
+      file: 
+        src: /opt/apache-tomcat-8.5.40
+        path: /opt/tomcat
+        state: link
+
+    - name: Change Ownership of Tomcat Installation
+      file: 
+        path: /opt/tomcat
+        owner: tomcat
+        group: tomcat
+        mode: 0755
+        state: directory
+        recurse: yes
+
+    - name: Deploy myjlcapp.war to Tomcat
+      copy: 
+        src: myjlcapp.war
+        dest: /opt/tomcat/webapps
+
+    - name: Create tomcat.service File
+      file: 
+        path: /etc/systemd/system/tomcat.service
+        state: touch
+
+    - name: create tomcat service
+      blockinfile:
+        path: /etc/systemd/system/tomcat.service
+        block: |
+          [Unit]
+          Description=Tomcat - instance %i
+          After=syslog.target network.target
+          [Service]
+          Type=forking
+          User=tomcat
+          Group=tomcat
+          Environment="CATALINA_HOME=/opt/tomcat/"
+          ExecStart=/opt/tomcat/bin/startup.sh
+          ExecStop=/opt/tomcat/bin/shutdown.sh
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: enable & start tomcat service
+      systemd: 
+        name: tomcat
+        state: started
+        enabled: yes
+
+    - name: Check tomcat Service Status
+      shell: service tomcat status
+      register: mytomStatus
+
+    - debug:
+        var: mytomStatus.stdout_lines
+
+       
+    
+=========================================================
+scp myplaybook19.yml ubuntu@3.138.155.60:/home/ubuntu/myansible
+=========================================================
+scp myjlcapp.war ubuntu@3.138.155.60:/home/ubuntu/myansible
+========================================================
+
+ansible all -a "service tomcat status"
+
+ansible-playbook myplaybook19.yml
+
+ansible all -a "service tomcat status"
+
+http://18.116.30.39:8080
+http://3.15.212.253:8080
+
+http://18.116.30.39:8080/myjlcapp
+http://3.15.212.253:8080/myjlcapp
+
+--------------------------
+ssh ubuntu@3.15.212.253
+

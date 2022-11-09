@@ -1,0 +1,117 @@
+Setup Nodes required
+==================
+Launch 2 Ec2 Instances
+
+MyNode1 
+========
+username : unbuntu
+password: jlcindia
+
+Public IP: 18.189.7.179
+Private IP: 172.31.28.107
+
+ssh ubuntu@18.189.7.179
+sudo hostnamectl set-hostname MyNode1
+
+MyNode2
+========
+username : unbuntu
+password: jlcindia
+
+Public IP: 3.15.159.16
+Private IP: 172.31.17.206
+
+ssh ubuntu@3.15.159.16
+sudo hostnamectl set-hostname MyNode2
+
+Ansible Controller - Node
+==================
+1) Create the VM Instance in the required Cloud
+
+2) Setup Password to Cloud Instance
+
+sudo passwd ubuntu
+
+sudo vim /etc/ssh/sshd_config
+
+service ssh restart
+
+logout
+
+ssh ubuntu@3.128.192.217
+
+sudo hostnamectl set-hostname Ansible-Controller
+
+logout
+
+ssh ubuntu@3.128.192.217
+
+
+3) Install Ansible
+
+sudo apt update
+sudo apt install software-properties-common
+sudo add-apt-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible
+
+4)Check the Ansible version
+
+ansible --version
+
+ansible [core 2.12.2]
+  config file = /etc/ansible/ansible.cfg
+
+5)Check the Pyhton version
+
+python3 --version
+
+6) Ansible Installation Location :  /etc/ansible
+
+cd /etc/ansible
+
+ls -l
+
+-rw-r--r-- 1 root root  614 Jan 31 20:26 ansible.cfg
+-rw-r--r-- 1 root root 1018 Jan 31 20:26 hosts
+drwxr-xr-x 2 root root 4096 Feb  1 17:52 roles
+
+*7) Update the inventoy in   /etc/ansible/hosts file
+
+sudo vim /etc/ansible/hosts
+
+172.31.28.107
+172.31.17.206
+
+[myjlcweb]
+172.31.28.107
+
+[myjlcdb]
+172.31.17.206
+
+8) Update ansible.cfg
+
+sudo vim /etc/ansible/ansible.cfg
+
+ansible.cfg
+==========
+[defaults]
+
+host_key_checking = False
+
+9)Run the first command
+
+ansible all -m ping -u ubuntu -k
+
+10) Practice Imperative Commands
+
+ansible all -m ping -u ubuntu -k
+
+ansible myjlcweb -m ping -u ubuntu -k
+
+ansible myjlcdb -m ping -u ubuntu -k
+
+ansible 172.31.28.107 -m ping -u ubuntu -k
+
+ansible 172.31.17.206 -m ping -u ubuntu -k
+
+
